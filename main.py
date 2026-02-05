@@ -568,15 +568,15 @@ async def send_final_callback(session_id: str, session_data: Dict[str, Any]):
     persona = session_data.get('persona', 'WORRIED_PARENT')
     current_stage = session_data.get('current_stage', 'UNKNOWN')
     
-    # FEATURE 4: Calculate confidence stats
-    high_conf_banks = len([i for i in intel.bankAccounts if i.confidence > 0.8])
-    high_conf_upis = len([i for i in intel.upiIds if i.confidence > 0.8])
-    high_conf_phones = len([i for i in intel.phoneNumbers if i.confidence > 0.8])
-    high_conf_links = len([i for i in intel.phishingLinks if i.confidence > 0.8])
+    # FEATURE 4: Report total stats
+    total_banks = len(intel.bankAccounts)
+    total_upis = len(intel.upiIds)
+    total_phones = len(intel.phoneNumbers)
+    total_links = len(intel.phishingLinks)
     
     # Enhanced agent notes with all feature data
     base_notes = session_data.get('agent_notes', 'Scam detected and intelligence extracted')
-    enhanced_notes = f"{base_notes}. Persona: {persona}. Final Stage: {current_stage}. High-confidence intel: {high_conf_banks} banks, {high_conf_upis} UPIs, {high_conf_phones} phones, {high_conf_links} links."
+    enhanced_notes = f"{base_notes}. Persona: {persona}. Final Stage: {current_stage}. Extracted intel: {total_banks} banks, {total_upis} UPIs, {total_phones} phones, {total_links} links."
     
     # Convert IntelligenceItem to simple string values for GUVI spec compliance
     payload = {
