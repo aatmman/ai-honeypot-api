@@ -770,6 +770,16 @@ async def health_check():
         }
     }
 
+@app.get("/")
+async def root():
+    """Root endpoint to show API is running"""
+    return {
+        "message": "Agentic Honeypot API is running! 🕵️",
+        "docs": "/docs",
+        "health": "/health",
+        "status": "online"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     print("=" * 60)
