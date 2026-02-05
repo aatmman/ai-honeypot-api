@@ -153,19 +153,25 @@ def extract_intelligence(text: str, existing: ExtractedIntelligence) -> Extracte
             ))
             print(f"🏦 Extracted bank account: {acc[:4]}...{acc[-4:]} (conf: {confidence})")
     
-    # Extract UPI IDs: word@payment_provider
-    upi_patterns = ['paytm', 'phonepe', 'gpay', 'upi', 'okaxis', 'ybl', 'okhdfcbank', 'oksbi', 'axl']
+    # Extract UPI IDs: word@payment_provider (exclude common email domains)
+    email_domains = ['gmail', 'yahoo', 'hotmail', 'outlook', 'mail', 'protonmail', 'icloud']
+    upi_patterns = ['paytm', 'phonepe', 'gpay', 'upi', 'okaxis', 'ybl', 'okhdfcbank', 'oksbi', 'axl', 'fakebank', 'bank']
     upi_ids = re.findall(r'([\w.-]+@[\w.-]+)', text)
     for upi in upi_ids:
-        if any(x in upi.lower() for x in upi_patterns):
-            if not any(item.value == upi for item in existing.upiIds):
-                existing.upiIds.append(IntelligenceItem(
-                    value=upi,
-                    confidence=0.95,  # UPI pattern is very reliable
-                    extractedAt=timestamp,
-                    extractionMethod="regex_upi"
-                ))
-                print(f"📱 Extracted UPI ID: {upi} (conf: 0.95)")
+        upi_lower = upi.lower()
+        # Skip if it looks like a regular email
+        is_email = any(domain in upi_lower for domain in email_domains) and '.' in upi_lower.split('@')[1]
+        # Accept if it matches known UPI patterns OR doesn't look like email
+        is_upi = any(x in upi_lower for x in upi_patterns) or not is_email
+        if is_upi and not any(item.value == upi for item in existing.upiIds):
+            confidence = 0.95 if any(x in upi_lower for x in upi_patterns[:9]) else 0.8
+            existing.upiIds.append(IntelligenceItem(
+                value=upi,
+                confidence=confidence,
+                extractedAt=timestamp,
+                extractionMethod="regex_upi"
+            ))
+            print(f"📱 Extracted UPI ID: {upi} (conf: {confidence})")
     
     # Extract phone numbers
     phone_numbers = re.findall(r'(\+?\d{10,13})', text)
