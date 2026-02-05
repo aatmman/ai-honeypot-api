@@ -520,6 +520,7 @@ Critical rules:
             else:
                 # Other API error - retry once
                 print(f"⚠️ Groq API error {response.status_code} (attempt {attempt + 1})")
+                print(f"   Error details: {response.text}")
                 if attempt < max_retries - 1:
                     await asyncio.sleep(1)
                     continue
