@@ -361,6 +361,8 @@ Strategy: {stage_strategy}
 7. Show emotion appropriate to your persona
 
 Your reply as the worried victim (under 25 words):"""
+    
+    return prompt
 
 def get_smart_fallback(session_data: Dict[str, Any]) -> str:
     """Generate context-aware fallback based on conversation state"""
