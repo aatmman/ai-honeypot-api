@@ -17,7 +17,6 @@ Built for the **India AI Impact Buildathon** (Problem Statement 2: AI for Fraud 
 
 ### 1. Install Dependencies
 ```bash
-cd backend
 pip install -r requirements.txt
 ```
 
@@ -68,7 +67,3 @@ Server runs at `http://localhost:8000`
 - **AI Model**: Llama 3.3 70B (via Groq - FREE)
 - **Validation**: Pydantic
 - **Deployment**: Railway
-
-## 📄 License
-
-MIT License - Built for India AI Impact Buildathon 2026
