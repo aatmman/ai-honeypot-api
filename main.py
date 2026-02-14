@@ -1,10 +1,12 @@
 """
-Agentic Honey-Pot with FREE Groq API
-No credit card required - completely FREE!
+Agentic Honey-Pot v3.0 — Full-Featured Intelligence Platform
+FREE stack: Groq AI + Whisper + Vision + SQLite
 """
 
-from fastapi import FastAPI, HTTPException, Header, Request
+from fastapi import FastAPI, HTTPException, Header, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import os
@@ -14,8 +16,26 @@ from datetime import datetime
 import json
 import random
 import asyncio
+import base64
 
-app = FastAPI(title="Agentic Honeypot API (Groq)", version="2.0")
+# Load .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, rely on system env vars
+
+# Import v3 modules
+import database as db
+from complaint_generator import generate_complaint_text
+
+app = FastAPI(title="Agentic Honeypot API v3.0", version="3.0")
+
+# Mount static files for dashboard
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+except:
+    pass  # Static dir may not exist in all environments
 
 # CORS configuration
 app.add_middleware(
@@ -665,6 +685,10 @@ async def honeypot_conversation(
     })
     session_data['message_count'] += 1
     
+    # V3: Persist session & message to database
+    db.save_session(session_id, session_data)
+    db.save_message(session_id, sender, new_message)
+    
     # Detect scam intent and select persona on first message
     if session_data['message_count'] == 1:
         is_scam, confidence, patterns = detect_scam_intent(new_message)
@@ -687,6 +711,16 @@ async def honeypot_conversation(
             new_message,
             session_data['intelligence']
         )
+        # V3: Save each extracted intel item to database
+        intel = session_data['intelligence']
+        for item in intel.bankAccounts:
+            db.save_intelligence(session_id, 'bank_account', item.value, item.confidence, item.extractionMethod)
+        for item in intel.upiIds:
+            db.save_intelligence(session_id, 'upi_id', item.value, item.confidence, item.extractionMethod)
+        for item in intel.phoneNumbers:
+            db.save_intelligence(session_id, 'phone', item.value, item.confidence, item.extractionMethod)
+        for item in intel.phishingLinks:
+            db.save_intelligence(session_id, 'link', item.value, item.confidence, item.extractionMethod)
     
     # Record typing start time
     typing_start = datetime.now()
@@ -722,6 +756,19 @@ async def honeypot_conversation(
     if session_data['scam_detected'] and not session_data['callback_sent']:
         if should_finalize_session(session_data):
             await send_final_callback(session_id, session_data)
+            # V3: Build network links and end session
+            intel = session_data['intelligence']
+            all_items = []
+            for item in intel.bankAccounts:
+                all_items.append({'value': item.value, 'type': 'bank_account'})
+            for item in intel.upiIds:
+                all_items.append({'value': item.value, 'type': 'upi_id'})
+            for item in intel.phoneNumbers:
+                all_items.append({'value': item.value, 'type': 'phone'})
+            for item in intel.phishingLinks:
+                all_items.append({'value': item.value, 'type': 'link'})
+            db.build_network_links(session_id, all_items)
+            db.end_session(session_id, session_data)
     
     return AgentResponse(
         status="success",
@@ -770,7 +817,7 @@ async def health_check():
     """Health check endpoint with feature status"""
     return {
         "status": "healthy",
-        "version": "2.1 (4-Feature Edition)",
+        "version": "3.0 (Full Intelligence Platform)",
         "active_sessions": len(sessions),
         "ai_provider": "Groq (FREE)" if GROQ_API_KEY else "Fallback",
         "groq_configured": bool(GROQ_API_KEY),
@@ -778,32 +825,328 @@ async def health_check():
             "stage_state_machine": True,
             "typing_delay_simulation": True,
             "multi_persona_system": True,
-            "confidence_weighted_intel": True
+            "confidence_weighted_intel": True,
+            "scammer_database": True,
+            "voice_analysis": True,
+            "image_intelligence": True,
+            "auto_complaint_generator": True,
+            "trap_document_generator": True,
+            "network_mapping": True,
+            "multi_language": True,
+            "live_dashboard": True
         }
     }
 
+
+# ═══════════════════════════════════════════════════════
+# SIMULATION API — Real-Time Demo for Judges
+# ═══════════════════════════════════════════════════════
+
+class SimulateRequest(BaseModel):
+    sessionId: str
+    scammerMessage: str
+    scenarioName: str = "bank_fraud"
+
+@app.post("/api/simulate")
+async def simulate_conversation(request: SimulateRequest):
+    """Process a scammer message through the full honeypot pipeline and return NLP analysis"""
+    session_id = f"sim-{request.sessionId}"
+    scam_msg = request.scammerMessage
+
+    # Initialize session if new
+    if session_id not in sessions:
+        sessions[session_id] = {
+            'created_at': datetime.now().isoformat(),
+            'conversation_history': [],
+            'intelligence': ExtractedIntelligence(),
+            'scam_detected': False,
+            'message_count': 0,
+            'agent_notes': '',
+            'callback_sent': False,
+            'persona': 'WORRIED_PARENT',
+            'current_stage': 'EXPLORATORY',
+            'typing_timestamps': []
+        }
+
+    session_data = sessions[session_id]
+
+    # Add scammer message
+    session_data['conversation_history'].append({
+        'sender': 'scammer', 'text': scam_msg,
+        'timestamp': int(datetime.now().timestamp() * 1000)
+    })
+    session_data['message_count'] += 1
+
+    # ── NLP Pipeline ──
+    # Step 1: Scam Detection
+    is_scam, confidence, patterns = detect_scam_intent(scam_msg)
+    if session_data['message_count'] == 1:
+        session_data['scam_detected'] = is_scam
+        session_data['scam_confidence'] = confidence
+        session_data['scam_patterns'] = patterns
+        persona = select_persona(patterns, None)
+        session_data['persona'] = persona
+    else:
+        # Re-run for NLP display
+        is_scam_now, confidence_now, patterns_now = detect_scam_intent(scam_msg)
+        if confidence_now > session_data.get('scam_confidence', 0):
+            session_data['scam_confidence'] = confidence_now
+        patterns = patterns_now
+        confidence = confidence_now
+
+    # Step 2: Stage Detection
+    stage = detect_scam_stage(session_data, scam_msg)
+    session_data['current_stage'] = stage
+
+    # Step 3: Intelligence Extraction
+    prev_intel = session_data['intelligence']
+    new_intel = extract_intelligence(scam_msg, prev_intel)
+    session_data['intelligence'] = new_intel
+
+    # Collect newly found items
+    intel_found = {
+        'bankAccounts': [{'value': i.value, 'confidence': i.confidence} for i in new_intel.bankAccounts],
+        'upiIds': [{'value': i.value, 'confidence': i.confidence} for i in new_intel.upiIds],
+        'phoneNumbers': [{'value': i.value, 'confidence': i.confidence} for i in new_intel.phoneNumbers],
+        'phishingLinks': [{'value': i.value, 'confidence': i.confidence} for i in new_intel.phishingLinks],
+        'keywords': new_intel.suspiciousKeywords
+    }
+
+    # Step 4: Generate AI Response
+    agent_reply = await generate_agent_response(session_data, scam_msg)
+
+    # Add AI response to history
+    session_data['conversation_history'].append({
+        'sender': 'user', 'text': agent_reply,
+        'timestamp': int(datetime.now().timestamp() * 1000)
+    })
+
+    return {
+        'reply': agent_reply,
+        'nlp': {
+            'scamDetected': is_scam or session_data.get('scam_detected', False),
+            'confidence': round(session_data.get('scam_confidence', confidence), 3),
+            'patternsFound': patterns,
+            'currentStage': stage,
+            'persona': session_data.get('persona', 'WORRIED_PARENT'),
+            'messageCount': session_data['message_count']
+        },
+        'intelligence': intel_found,
+        'sessionId': session_id
+    }
+
+
+# ═══════════════════════════════════════════════════════
+# V3.0 — Dashboard & Intelligence API
+# ═══════════════════════════════════════════════════════
+
 @app.get("/")
 async def root():
-    """Root endpoint to show API is running"""
+    """Serve the dashboard UI"""
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return {
+            "message": "Agentic Honeypot API v3.0 is running! 🛡️",
+            "dashboard": "/",
+            "docs": "/docs",
+            "health": "/health",
+            "status": "online"
+        }
+
+@app.get("/api/dashboard/stats")
+async def dashboard_stats():
+    """Get overview stats for dashboard"""
+    return db.get_dashboard_stats()
+
+@app.get("/api/dashboard/scammers")
+async def dashboard_scammers():
+    """Get all scammer profiles"""
+    return db.get_all_scammers()
+
+@app.get("/api/dashboard/network")
+async def dashboard_network():
+    """Get network graph data"""
+    return db.get_network_data()
+
+@app.get("/api/dashboard/session/{session_id}")
+async def dashboard_session_detail(session_id: str):
+    """Get full session detail with messages and intel"""
+    data = db.get_session_detail(session_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return data
+
+
+# ═══════════════════════════════════════════════════════
+# V3.0 — Voice Analysis (Groq Whisper — FREE)
+# ═══════════════════════════════════════════════════════
+
+@app.post("/api/voice/analyze")
+async def analyze_voice(file: UploadFile = File(...)):
+    """Transcribe voice message and analyze for scam content"""
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=503, detail="Groq API key not configured")
+    
+    audio_data = await file.read()
+    if len(audio_data) > 25 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 25MB)")
+    
+    # Step 1: Transcribe with Whisper
+    transcript = ""
+    try:
+        import io
+        files = {
+            'file': (file.filename or 'audio.mp3', io.BytesIO(audio_data), file.content_type or 'audio/mpeg'),
+            'model': (None, 'whisper-large-v3'),
+            'language': (None, 'en')
+        }
+        whisper_res = requests.post(
+            "https://api.groq.com/openai/v1/audio/transcriptions",
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+            files=files,
+            timeout=30
+        )
+        if whisper_res.status_code == 200:
+            transcript = whisper_res.json().get('text', '')
+            print(f"🎤 Voice transcribed: {transcript[:80]}...")
+        else:
+            print(f"⚠️ Whisper error: {whisper_res.status_code} {whisper_res.text}")
+            transcript = "[Transcription failed]"
+    except Exception as e:
+        print(f"⚠️ Whisper exception: {e}")
+        transcript = "[Transcription error]"
+    
+    # Step 2: Analyze transcript for scam
+    is_scam, confidence, patterns = detect_scam_intent(transcript)
+    intel = extract_intelligence(transcript, ExtractedIntelligence())
+    
+    # Step 3: AI analysis
+    scam_analysis = f"Scam Detected: {'YES' if is_scam else 'NO'}\nConfidence: {confidence:.0%}\nPatterns: {', '.join(patterns) if patterns else 'None'}"
+    
     return {
-        "message": "Agentic Honeypot API is running! 🕵️",
-        "docs": "/docs",
-        "health": "/health",
-        "status": "online"
+        "transcript": transcript,
+        "scam_analysis": scam_analysis,
+        "scam_detected": is_scam,
+        "confidence": confidence,
+        "intelligence": {
+            "bankAccounts": [item.value for item in intel.bankAccounts],
+            "upiIds": [item.value for item in intel.upiIds],
+            "phoneNumbers": [item.value for item in intel.phoneNumbers],
+            "phishingLinks": [item.value for item in intel.phishingLinks]
+        }
     }
+
+
+# ═══════════════════════════════════════════════════════
+# V3.0 — Image Intelligence (Groq Vision — FREE)
+# ═══════════════════════════════════════════════════════
+
+@app.post("/api/image/analyze")
+async def analyze_image(file: UploadFile = File(...)):
+    """Analyze scam image using Groq Vision AI"""
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=503, detail="Groq API key not configured")
+    
+    image_data = await file.read()
+    if len(image_data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 10MB)")
+    
+    # Convert to base64
+    b64_image = base64.b64encode(image_data).decode('utf-8')
+    content_type = file.content_type or 'image/png'
+    
+    # Analyze with Groq Vision
+    analysis_text = ""
+    try:
+        vision_payload = {
+            "model": "llama-3.2-90b-vision-preview",
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Analyze this image for potential scam or fraud content. Look for: fake bank alerts, phishing messages, QR codes, suspicious URLs, payment requests, impersonation of banks or government agencies. Extract any bank account numbers, UPI IDs, phone numbers, or URLs visible in the image. List everything you find."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:{content_type};base64,{b64_image}"
+                        }
+                    }
+                ]
+            }],
+            "max_tokens": 500,
+            "temperature": 0.3
+        }
+        
+        vision_res = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=vision_payload,
+            timeout=30
+        )
+        
+        if vision_res.status_code == 200:
+            analysis_text = vision_res.json()['choices'][0]['message']['content']
+            print(f"🖼️ Image analyzed: {analysis_text[:80]}...")
+        else:
+            print(f"⚠️ Vision error: {vision_res.status_code} {vision_res.text}")
+            analysis_text = "[Image analysis failed - model may not support this image type]"
+    except Exception as e:
+        print(f"⚠️ Vision exception: {e}")
+        analysis_text = f"[Image analysis error: {str(e)}]"
+    
+    # Extract intelligence from analysis text
+    intel = extract_intelligence(analysis_text, ExtractedIntelligence())
+    
+    return {
+        "analysis": analysis_text,
+        "intelligence": {
+            "bankAccounts": [item.value for item in intel.bankAccounts],
+            "upiIds": [item.value for item in intel.upiIds],
+            "phoneNumbers": [item.value for item in intel.phoneNumbers],
+            "phishingLinks": [item.value for item in intel.phishingLinks]
+        }
+    }
+
+
+# ═══════════════════════════════════════════════════════
+# V3.0 — Auto Complaint Generator
+# ═══════════════════════════════════════════════════════
+
+@app.get("/api/complaint/{session_id}")
+async def get_complaint(session_id: str):
+    """Generate cybercrime complaint for a session"""
+    session_data = db.get_session_detail(session_id)
+    if not session_data:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    complaint = generate_complaint_text(session_data)
+    return {"complaint": complaint, "session_id": session_id}
+
 
 if __name__ == "__main__":
     import uvicorn
     print("=" * 60)
-    print("🕵️  Agentic Honeypot API v2.1 (4-Feature Edition)")
+    print("🛡️  Agentic Honeypot API v3.0 — Full Intelligence Platform")
     print("=" * 60)
-    print("\n✨ WINNING FEATURES:")
-    print("   1️⃣  Stage State Machine - Adapts to scam progression")
-    print("   2️⃣  Typing Delay Simulation - Human-like response timing")
-    print("   3️⃣  Multi-Persona System - 4 victim personalities")
-    print("   4️⃣  Confidence-Weighted Intel - Scored extraction\n")
+    print("\n✨ FEATURES:")
+    print("   🎭 Multi-Persona AI      🧠 Stage State Machine")
+    print("   ⏱️  Typing Delay          📊 Confidence Scoring")
+    print("   🛡️  Prompt Injection Shield")
+    print("   🗄️  Scammer Database      🕸️  Network Mapping")
+    print("   🎤 Voice Analysis (Whisper)")
+    print("   🖼️  Image Intel (Vision)")
+    print("   📝 Auto Complaint Generator")
+    print("   📄 Trap Document Generator")
+    print("   🖥️  Live Dashboard\n")
     if GROQ_API_KEY:
-        print("✅ AI: llama-3.3-70b-versatile (FREE Groq API)")
+        print("✅ AI: Groq (LLM + Whisper + Vision) — 100% FREE")
     else:
         print("⚠️  No GROQ_API_KEY - using smart fallbacks")
         print("   Get FREE key at: https://console.groq.com/")

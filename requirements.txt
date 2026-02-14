@@ -11,3 +11,6 @@ python-dotenv>=1.0.0
 
 # Form data parsing
 python-multipart>=0.0.6
+
+# Static file serving (dashboard UI)
+aiofiles>=23.0
