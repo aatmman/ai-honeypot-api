@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Honey-Pot — Intelligence Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🛡️</div>
+            <span class="logo-text">HoneyPot<span class="logo-accent">AI</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-item" data-tab="simulate">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-label">Simulate</span>
+            </a>
+            <a href="#" class="nav-item active" data-tab="overview">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Overview</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="sessions">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Sessions</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="scammers">
+                <span class="nav-icon">🕵️</span>
+                <span class="nav-label">Scammers</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="network">
+                <span class="nav-icon">🕸️</span>
+                <span class="nav-label">Network</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="voice">
+                <span class="nav-icon">🎤</span>
+                <span class="nav-label">Voice Analysis</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="image">
+                <span class="nav-icon">🖼️</span>
+                <span class="nav-label">Image Intel</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="complaint">
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">Complaint</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="trap">
+                <span class="nav-icon">📄</span>
+                <span class="nav-label">Trap Docs</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="status-dot online"></div>
+            <span>System Online</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-bar">
+            <div class="page-title">
+                <h1 id="page-heading">Dashboard Overview</h1>
+                <p class="subtitle" id="page-subtitle">Real-time scam intelligence monitoring</p>
+            </div>
+            <div class="header-actions">
+                <div class="live-badge">
+                    <span class="pulse"></span>
+                    LIVE
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB: Simulate (MAIN DEMO) -->
+        <section class="tab-content" id="tab-simulate">
+            <div class="sim-container">
+                <!-- Left: WhatsApp Chat -->
+                <div class="sim-chat-panel card clay">
+                    <div class="wa-header">
+                        <div class="wa-avatar">🔴</div>
+                        <div class="wa-info">
+                            <div class="wa-name" id="sim-scammer-name">Unknown Caller</div>
+                            <div class="wa-status" id="sim-caller-status">online</div>
+                        </div>
+                        <div class="wa-badges" id="sim-badges"></div>
+                    </div>
+                    <div class="wa-chat" id="sim-chat-window"></div>
+                    <div class="wa-input-bar">
+                        <span class="wa-input-text">🛡️ AI HoneyPot is handling this conversation...</span>
+                    </div>
+                </div>
+                <!-- Right: Feature Showcase -->
+                <div class="sim-feature-panel">
+                    <div class="sim-controls card clay">
+                        <h3>🚀 Live System Simulation</h3>
+                        <p class="card-desc">Watch the Agentic Honey-Pot engage a scammer in real-time using AI</p>
+                        <div class="sim-scenario-select">
+                            <label
+                                style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block">Choose
+                                Scenario:</label>
+                            <div class="sim-scenario-btns" id="sim-scenario-btns">
+                                <button class="sim-scenario-btn active" data-scenario="bank_fraud"
+                                    onclick="selectScenario(this)"><span>🏦</span> Bank Fraud</button>
+                                <button class="sim-scenario-btn" data-scenario="tech_support"
+                                    onclick="selectScenario(this)"><span>💻</span> Tech Support</button>
+                                <button class="sim-scenario-btn" data-scenario="lottery_scam"
+                                    onclick="selectScenario(this)"><span>🎰</span> Lottery Scam</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-simulate" id="sim-start-btn" onclick="startSimulation()">
+                            <span class="btn-icon">▶</span> Start Simulation
+                        </button>
+                        <div class="sim-progress" id="sim-progress" style="display:none">
+                            <div class="sim-progress-bar">
+                                <div class="sim-progress-fill" id="sim-progress-fill"></div>
+                            </div>
+                            <span class="sim-progress-label" id="sim-progress-label">Phase 1: Scam Engagement</span>
+                        </div>
+                    </div>
+                    <!-- NLP Analysis Panel -->
+                    <div class="sim-nlp-panel card clay" id="sim-nlp-panel" style="display:none">
+                        <h4>🧠 NLP Analysis Pipeline (Real-Time)</h4>
+                        <div class="nlp-grid">
+                            <div class="nlp-item"><span class="nlp-label">Scam Detected</span><span class="nlp-value"
+                                    id="nlp-scam-detected">—</span></div>
+                            <div class="nlp-item"><span class="nlp-label">Confidence</span><span class="nlp-value"
+                                    id="nlp-confidence">—</span></div>
+                            <div class="nlp-item"><span class="nlp-label">Stage</span><span class="nlp-value"
+                                    id="nlp-stage">—</span></div>
+                            <div class="nlp-item"><span class="nlp-label">Persona</span><span class="nlp-value"
+                                    id="nlp-persona">—</span></div>
+                        </div>
+                        <div class="nlp-patterns" id="nlp-patterns"></div>
+                    </div>
+                    <!-- Live Intel Panel -->
+                    <div class="sim-intel-panel card clay" id="sim-intel-panel" style="display:none">
+                        <h4>🏦 Live Intelligence Extraction</h4>
+                        <div class="sim-intel-items" id="sim-intel-items"></div>
+                    </div>
+                    <!-- Feature Demo Panels (appear sequentially) -->
+                    <div class="sim-demo-panel card clay" id="sim-demo-voice" style="display:none">
+                        <h4>🎤 Voice Analysis — Groq Whisper</h4>
+                        <div class="sim-demo-content" id="sim-voice-content"></div>
+                    </div>
+                    <div class="sim-demo-panel card clay" id="sim-demo-image" style="display:none">
+                        <h4>🖼️ Image Intelligence — Groq Vision</h4>
+                        <div class="sim-demo-content" id="sim-image-content"></div>
+                    </div>
+                    <div class="sim-demo-panel card clay" id="sim-demo-network" style="display:none">
+                        <h4>🕸️ Network Mapping</h4>
+                        <div class="sim-demo-content" id="sim-network-content"></div>
+                    </div>
+                    <div class="sim-demo-panel card clay" id="sim-demo-report" style="display:none">
+                        <h4>📊 Intelligence Report</h4>
+                        <div class="sim-demo-content" id="sim-report-content"></div>
+                    </div>
+                    <div class="sim-demo-panel card clay" id="sim-demo-complaint" style="display:none">
+                        <h4>📝 Auto Complaint (FIR-Ready)</h4>
+                        <div class="sim-demo-content" id="sim-complaint-content"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Overview -->
+        <section class="tab-content active" id="tab-overview">
+            <div class="stats-grid">
+                <div class="stat-card clay" id="stat-sessions">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="val-sessions">0</span>
+                        <span class="stat-label">Total Sessions</span>
+                    </div>
+                </div>
+                <div class="stat-card clay" id="stat-scammers">
+                    <div class="stat-icon">🕵️</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="val-scammers">0</span>
+                        <span class="stat-label">Scammers Caught</span>
+                    </div>
+                </div>
+                <div class="stat-card clay" id="stat-intel">
+                    <div class="stat-icon">🏦</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="val-intel">0</span>
+                        <span class="stat-label">Intel Extracted</span>
+                    </div>
+                </div>
+                <div class="stat-card clay" id="stat-messages">
+                    <div class="stat-icon">📨</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="val-messages">0</span>
+                        <span class="stat-label">Messages Processed</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card clay intel-breakdown">
+                    <h3>Intelligence Breakdown</h3>
+                    <div class="breakdown-bars">
+                        <div class="bar-item">
+                            <span class="bar-label">🏦 Bank Accounts</span>
+                            <div class="bar-track">
+                                <div class="bar-fill banks" id="bar-banks" style="width:0%"></div>
+                            </div>
+                            <span class="bar-count" id="count-banks">0</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">📱 UPI IDs</span>
+                            <div class="bar-track">
+                                <div class="bar-fill upis" id="bar-upis" style="width:0%"></div>
+                            </div>
+                            <span class="bar-count" id="count-upis">0</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">📞 Phone Numbers</span>
+                            <div class="bar-track">
+                                <div class="bar-fill phones" id="bar-phones" style="width:0%"></div>
+                            </div>
+                            <span class="bar-count" id="count-phones">0</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">🔗 Phishing Links</span>
+                            <div class="bar-track">
+                                <div class="bar-fill links" id="bar-links" style="width:0%"></div>
+                            </div>
+                            <span class="bar-count" id="count-links">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card clay recent-sessions">
+                    <h3>Recent Sessions</h3>
+                    <div class="session-list" id="recent-session-list">
+                        <div class="empty-state">No sessions yet. Waiting for scammers...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Sessions -->
+        <section class="tab-content" id="tab-sessions">
+            <div class="card clay">
+                <h3>All Sessions</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Session ID</th>
+                                <th>Persona</th>
+                                <th>Stage</th>
+                                <th>Messages</th>
+                                <th>Confidence</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-table-body">
+                            <tr>
+                                <td colspan="7" class="empty-state">No sessions yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Session detail modal -->
+            <div class="modal-overlay" id="session-modal" style="display:none">
+                <div class="modal card clay">
+                    <div class="modal-header">
+                        <h3>Session Detail</h3>
+                        <button class="close-btn" onclick="closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="session-modal-body"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Scammers -->
+        <section class="tab-content" id="tab-scammers">
+            <div class="card clay">
+                <h3>Scammer Database</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Identifier</th>
+                                <th>Type</th>
+                                <th>First Seen</th>
+                                <th>Last Seen</th>
+                                <th>Sessions</th>
+                                <th>Threat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scammers-table-body">
+                            <tr>
+                                <td colspan="6" class="empty-state">No scammers caught yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Network -->
+        <section class="tab-content" id="tab-network">
+            <div class="card clay">
+                <h3>Scammer Network Map</h3>
+                <p class="card-desc">Visual connections between scammer identifiers found in the same session</p>
+                <div class="network-container">
+                    <canvas id="network-canvas" width="800" height="500"></canvas>
+                </div>
+                <div class="network-legend">
+                    <span class="legend-item"><span class="dot" style="background:#6c5ce7"></span> Bank Account</span>
+                    <span class="legend-item"><span class="dot" style="background:#00b894"></span> UPI ID</span>
+                    <span class="legend-item"><span class="dot" style="background:#e17055"></span> Phone</span>
+                    <span class="legend-item"><span class="dot" style="background:#fdcb6e"></span> Link</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Voice Analysis -->
+        <section class="tab-content" id="tab-voice">
+            <div class="card clay">
+                <h3>🎤 Voice Message Analysis</h3>
+                <p class="card-desc">Upload a voice message to transcribe and analyze for scam content</p>
+                <div class="upload-zone" id="voice-drop-zone">
+                    <div class="upload-icon">🎙️</div>
+                    <p>Drag & drop an audio file here or <label for="voice-file" class="upload-link">browse</label></p>
+                    <p class="upload-hint">Supports: MP3, WAV, M4A, OGG (max 25MB)</p>
+                    <input type="file" id="voice-file" accept="audio/*" hidden>
+                </div>
+                <div class="analysis-result" id="voice-result" style="display:none">
+                    <div class="result-section">
+                        <h4>📝 Transcription</h4>
+                        <div class="result-box" id="voice-transcript"></div>
+                    </div>
+                    <div class="result-section">
+                        <h4>🔍 Scam Analysis</h4>
+                        <div class="result-box" id="voice-analysis"></div>
+                    </div>
+                    <div class="result-section">
+                        <h4>🏦 Extracted Intelligence</h4>
+                        <div class="result-box" id="voice-intel"></div>
+                    </div>
+                </div>
+                <div class="loading-spinner" id="voice-loading" style="display:none">
+                    <div class="spinner"></div>
+                    <p>Transcribing & analyzing voice message...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Image Intel -->
+        <section class="tab-content" id="tab-image">
+            <div class="card clay">
+                <h3>🖼️ Image Intelligence</h3>
+                <p class="card-desc">Upload scam screenshots, fake alerts, or QR codes for AI analysis</p>
+                <div class="upload-zone" id="image-drop-zone">
+                    <div class="upload-icon">📸</div>
+                    <p>Drag & drop an image here or <label for="image-file" class="upload-link">browse</label></p>
+                    <p class="upload-hint">Supports: PNG, JPG, WEBP (max 10MB)</p>
+                    <input type="file" id="image-file" accept="image/*" hidden>
+                </div>
+                <div class="image-preview-area" id="image-preview" style="display:none">
+                    <img id="preview-img" src="" alt="Uploaded image">
+                </div>
+                <div class="analysis-result" id="image-result" style="display:none">
+                    <div class="result-section">
+                        <h4>🔍 Image Analysis</h4>
+                        <div class="result-box" id="image-analysis"></div>
+                    </div>
+                    <div class="result-section">
+                        <h4>🏦 Extracted Intelligence</h4>
+                        <div class="result-box" id="image-intel"></div>
+                    </div>
+                </div>
+                <div class="loading-spinner" id="image-loading" style="display:none">
+                    <div class="spinner"></div>
+                    <p>Analyzing image with Vision AI...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Complaint -->
+        <section class="tab-content" id="tab-complaint">
+            <div class="card clay">
+                <h3>📝 Auto Complaint Generator</h3>
+                <p class="card-desc">Generate FIR-ready cybercrime complaint from any session</p>
+                <div class="complaint-controls">
+                    <select id="complaint-session-select" class="select-input">
+                        <option value="">Select a session...</option>
+                    </select>
+                    <button class="btn btn-primary" id="generate-complaint-btn" onclick="generateComplaint()">
+                        Generate Complaint
+                    </button>
+                </div>
+                <div class="complaint-preview" id="complaint-preview" style="display:none">
+                    <pre id="complaint-text"></pre>
+                    <div class="complaint-actions">
+                        <button class="btn btn-secondary" onclick="downloadComplaint()">📥 Download as TXT</button>
+                        <button class="btn btn-secondary" onclick="copyComplaint()">📋 Copy to Clipboard</button>
+                    </div>
+                </div>
+                <div class="loading-spinner" id="complaint-loading" style="display:none">
+                    <div class="spinner"></div>
+                    <p>Generating complaint letter...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Trap Documents -->
+        <section class="tab-content" id="tab-trap">
+            <div class="card clay">
+                <h3>📄 Trap Document Generator</h3>
+                <p class="card-desc">Generate realistic-looking fake bank documents to keep scammers engaged</p>
+                <div class="trap-controls">
+                    <div class="form-group">
+                        <label>Document Type</label>
+                        <select id="trap-doc-type" class="select-input">
+                            <option value="passbook">Bank Passbook Page</option>
+                            <option value="statement">Account Statement</option>
+                            <option value="balance">Balance Certificate</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fake Account Holder Name</label>
+                        <input type="text" id="trap-name" class="text-input" value="Rajesh Kumar Sharma"
+                            placeholder="Enter fake name">
+                    </div>
+                    <div class="form-group">
+                        <label>Fake Balance (₹)</label>
+                        <input type="text" id="trap-balance" class="text-input" value="2,45,000"
+                            placeholder="Enter fake balance">
+                    </div>
+                    <button class="btn btn-primary" onclick="generateTrapDoc()">🎣 Generate Trap Document</button>
+                </div>
+                <div class="trap-preview" id="trap-preview" style="display:none">
+                    <div class="trap-document" id="trap-document-content"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

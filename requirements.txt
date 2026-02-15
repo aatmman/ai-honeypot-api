@@ -1,0 +1,16 @@
+# Core framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# HTTP requests (for Groq API calls)
+requests>=2.31.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Form data parsing
+python-multipart>=0.0.6
+
+# Static file serving (dashboard UI)
+aiofiles>=23.0
