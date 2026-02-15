@@ -935,7 +935,7 @@ async function startSimulation() {
     document.getElementById('sim-image-content').innerHTML = `
         <p>📎 <strong>scam_screenshot.png</strong> — Uploaded for Vision AI analysis</p>
         ${scenario.imageHtml}
-        <p style="margin-top:8px">⏳ Analyzing with Groq Vision AI (llama-3.2-90b-vision-preview)... <span class="loading-dot">●</span></p>
+        <p style="margin-top:8px">⏳ Analyzing with Groq Vision AI (Llama-4-Scout)... <span class="loading-dot">●</span></p>
     `;
     scrollFeaturePanel();
 

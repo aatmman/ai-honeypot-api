@@ -1121,7 +1121,7 @@ Format it as a structured analysis. Include SPECIFIC fake numbers/IDs that could
         "analysis": analysis_text,
         "imageType": scenario["image_type"],
         "threatLevel": "HIGH",
-        "model": "llama-3.2-90b-vision-preview",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
         "intelligence": {
             "bankAccounts": [item.value for item in intel.bankAccounts],
             "upiIds": [item.value for item in intel.upiIds],
@@ -1257,7 +1257,7 @@ async def analyze_image(file: UploadFile = File(...)):
     analysis_text = ""
     try:
         vision_payload = {
-            "model": "llama-3.2-90b-vision-preview",
+            "model": "meta-llama/llama-4-scout-17b-16e-instruct",
             "messages": [{
                 "role": "user",
                 "content": [
