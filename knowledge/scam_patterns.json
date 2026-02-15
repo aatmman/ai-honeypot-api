@@ -1,0 +1,44 @@
+[
+  {
+    "category": "Digital Arrest",
+    "keywords": ["police", "cbi", "narco", "money laundering", "arrest", "warrant", "video call", "aadhaar", "fedex", "customs", "crime branch"],
+    "content": "Digital Arrest Scams involve fraudsters posing as law enforcement (CBI, Police, Customs). They claim the victim's Aadhaar or bank account is linked to a crime (drug trafficking, money laundering). They force the victim to stay on a video call ('Digital Arrest'), which is NOT a real legal procedure in India. Real police never interrogate via video call or demand money for 'verification'.",
+    "legal_info": "Impersonating a public servant is a crime under Section 170 IPC. 'Digital Arrest' has no legal basis in the Bhartiya Nyaya Sanhita (BNS) or CrPC.",
+    "risk_level": "CRITICAL"
+  },
+  {
+    "category": "UPI Fraud",
+    "keywords": ["upi", "pin", "qr code", "receive money", "cashback", "refund", "gpay", "phonepe", "paytm", "scan"],
+    "content": "UPI Scams often involve 'request money' links disguised as refunds or cashback. Remember: UPI PIN is ONLY needed to SEND money, never to receive it. If someone asks you to enter your PIN to receive a prize, it is a scam.",
+    "legal_info": "Unauthorized access to computer resource is punishable under Section 66C & 66D of the IT Act, 2000.",
+    "risk_level": "HIGH"
+  },
+  {
+    "category": "Tech Support Scam",
+    "keywords": ["virus", "microsoft", "windows", "defender", "expired", "driver", "teamviewer", "anydesk", "remote", "support"],
+    "content": "Tech Support Scams display fake virus popups claiming your computer is infected. They ask you to call a number and install remote access software (AnyDesk, TeamViewer). Legitimate companies like Microsoft never call you unsolicited to fix your computer.",
+    "legal_info": "Cheating by personation is punishable under Section 419 IPC (or Section 319 BNS).",
+    "risk_level": "HIGH"
+  },
+  {
+    "category": "Bank KYC Scam",
+    "keywords": ["kyc", "pan card", "blocked", "expire", "update", "link", "sbi", "hdfc", "icici", "otp"],
+    "content": "Bank KYC Scams send SMS warning that your account will be blocked unless you update KYC immediately via a link. Banks never send links for KYC updates via SMS. These links lead to phishing sites.",
+    "legal_info": "Phishing is a cyber offence under Section 66 IT Act.",
+    "risk_level": "HIGH"
+  },
+  {
+    "category": "Lottery Scam",
+    "keywords": ["lottery", "winner", "prize", "kbc", "crore", "lakh", "processing fee", "tax", "clearance"],
+    "content": "Lottery Scams claim you won a massive prize but must pay a small 'processing fee' or 'tax' first. Legitimate lotteries never ask winners to pay money to release the prize.",
+    "legal_info": "Advance fee fraud falls under Section 420 IPC (Cheating).",
+    "risk_level": "MEDIUM"
+  },
+  {
+    "category": "Sextortion",
+    "keywords": ["video", "leak", "upload", "youtube", "viral", "nude", "recorded", "cam", "shame"],
+    "content": "Sextortion involves threatening to release compromising videos (often fake or recorded during a video call) unless money is paid. Do not pay. Report to cybercrime.gov.in immediately.",
+    "legal_info": "Extortion is punishable under Section 384 IPC (Section 308 BNS). Publishing private images without consent is under Section 66E IT Act.",
+    "risk_level": "CRITICAL"
+  }
+]

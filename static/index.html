@@ -81,6 +81,25 @@
         <!-- TAB: Simulate (MAIN DEMO) -->
         <section class="tab-content" id="tab-simulate">
             <div class="sim-container">
+                <!-- Digital Arrest Video Call Overlay -->
+                <div class="da-video-overlay" id="da-video-overlay" style="display:none">
+                    <div class="da-video-header">
+                        <span class="da-rec-dot"></span>
+                        <span class="da-rec-text">REC</span>
+                        <span class="da-video-title">📹 Incoming Video Call — CBI Cyber Crime Division</span>
+                        <span class="da-video-timer" id="da-video-timer">00:00</span>
+                    </div>
+                    <div class="da-video-body">
+                        <video id="da-video-player" muted playsinline preload="auto"
+                            style="width:100%;border-radius:8px;max-height:350px;object-fit:cover">
+                            <source src="/static/digital_arrest_call.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="da-video-footer">
+                        <span class="da-caller-badge">🚔 Inspector Vikram Sharma — CBI HQ, New Delhi</span>
+                        <span class="da-video-warning">⚠️ "You are under Digital Arrest. Do NOT disconnect."</span>
+                    </div>
+                </div>
                 <!-- Left: WhatsApp Chat -->
                 <div class="sim-chat-panel card clay">
                     <div class="wa-header">
@@ -124,6 +143,47 @@
                                 <div class="sim-progress-fill" id="sim-progress-fill"></div>
                             </div>
                             <span class="sim-progress-label" id="sim-progress-label">Phase 1: Scam Engagement</span>
+                        </div>
+                    </div>
+                    <!-- Multi-Agent Orchestration Panel -->
+                    <div class="sim-agents-panel card clay" id="sim-agents-panel" style="display:none">
+                        <h4>🤖 Multi-Agent Swarm Orchestration</h4>
+                        <div class="agents-grid">
+                            <div class="agent-card agent-engager" id="agent-engager">
+                                <div class="agent-header">
+                                    <span class="agent-icon">🎭</span>
+                                    <span class="agent-name">Engager Agent</span>
+                                    <span class="agent-status-dot" id="agent-engager-dot"></span>
+                                </div>
+                                <div class="agent-action" id="agent-engager-action">Initializing...</div>
+                                <div class="agent-decision" id="agent-engager-decision"></div>
+                            </div>
+                            <div class="agent-card agent-analyst" id="agent-analyst">
+                                <div class="agent-header">
+                                    <span class="agent-icon">🔍</span>
+                                    <span class="agent-name">Analyst Agent</span>
+                                    <span class="agent-status-dot" id="agent-analyst-dot"></span>
+                                </div>
+                                <div class="agent-action" id="agent-analyst-action">Initializing...</div>
+                                <div class="agent-decision" id="agent-analyst-decision"></div>
+                            </div>
+                            <div class="agent-card agent-intel" id="agent-intel">
+                                <div class="agent-header">
+                                    <span class="agent-icon">📋</span>
+                                    <span class="agent-name">Intel Agent</span>
+                                    <span class="agent-status-dot" id="agent-intel-dot"></span>
+                                </div>
+                                <div class="agent-action" id="agent-intel-action">Initializing...</div>
+                                <div class="agent-decision" id="agent-intel-decision"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Scam Reasoning Panel -->
+                    <div class="sim-reasoning-panel card clay" id="sim-reasoning-panel" style="display:none">
+                        <h4>⚖️ Scam vs Legitimate — AI Reasoning</h4>
+                        <div class="reasoning-content" id="reasoning-content">
+                            <div class="reasoning-verdict" id="reasoning-verdict"></div>
+                            <div class="reasoning-list" id="reasoning-list"></div>
                         </div>
                     </div>
                     <!-- NLP Analysis Panel -->

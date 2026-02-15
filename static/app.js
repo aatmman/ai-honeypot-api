@@ -724,6 +724,17 @@ async function startSimulation() {
     document.getElementById('nlp-patterns').innerHTML = '';
     document.getElementById('sim-progress').style.display = 'block';
     document.getElementById('sim-scammer-name').textContent = scenario.callerName;
+    // Reset agent and reasoning panels
+    document.getElementById('sim-agents-panel').style.display = 'none';
+    document.getElementById('sim-reasoning-panel').style.display = 'none';
+    document.getElementById('reasoning-list').innerHTML = '';
+    document.getElementById('reasoning-verdict').innerHTML = '';
+    document.getElementById('reasoning-verdict').className = 'reasoning-verdict';
+    ['agent-engager', 'agent-analyst', 'agent-intel'].forEach(id => {
+        document.getElementById(id + '-action').textContent = 'Initializing...';
+        document.getElementById(id + '-decision').textContent = '';
+        document.getElementById(id + '-dot').className = 'agent-status-dot';
+    });
     ['voice', 'image', 'network', 'report', 'complaint'].forEach(p => {
         document.getElementById(`sim-demo-${p}`).style.display = 'none';
     });
@@ -732,9 +743,67 @@ async function startSimulation() {
     let timeCounter = 0;
     let allIntel = { bankAccounts: [], upiIds: [], phoneNumbers: [], phishingLinks: [] };
 
+    // ══════════════════════════════════════════════
+    // DIGITAL ARREST: Video Call Phase (plays first)
+    // ══════════════════════════════════════════════
+    if (selectedScenario === 'digital_arrest') {
+        const videoOverlay = document.getElementById('da-video-overlay');
+        const videoPlayer = document.getElementById('da-video-player');
+        const videoTimer = document.getElementById('da-video-timer');
+
+        // Show video overlay, hide chat panels temporarily
+        videoOverlay.style.display = 'block';
+        document.querySelector('.sim-chat-panel').style.opacity = '0.3';
+        document.querySelector('.sim-feature-panel').style.opacity = '0.3';
+
+        updateProgress(2, 'Incoming Video Call — CBI Cyber Crime Division');
+
+        // Play video
+        videoPlayer.currentTime = 0;
+        try { await videoPlayer.play(); } catch (e) { console.log('Video autoplay blocked:', e); }
+
+        // Timer countdown for 5 seconds
+        let elapsed = 0;
+        const timerInterval = setInterval(() => {
+            elapsed++;
+            const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
+            videoTimer.textContent = `${mins}:${secs}`;
+        }, 1000);
+
+        // Wait 5 seconds for video to play
+        await sleep(5000);
+
+        // Stop video and hide overlay
+        clearInterval(timerInterval);
+        videoPlayer.pause();
+        videoOverlay.style.display = 'none';
+        document.querySelector('.sim-chat-panel').style.opacity = '1';
+        document.querySelector('.sim-feature-panel').style.opacity = '1';
+
+        await sleep(500);
+    } else {
+        document.getElementById('da-video-overlay').style.display = 'none';
+    }
+
     // System message
     chat.innerHTML += `<div class="wa-msg wa-msg-system">🔐 End-to-end encrypted simulation — ${scenario.name}</div>`;
     updateProgress(5, 'Phase 1: Scam Engagement');
+
+    // FIR Document HTML (for Digital Arrest scenario)
+    const firDocumentHtml = `
+        <div class="wa-fir-document">
+            <div class="fir-header">📋 APPLICATION FOR OBTAINING<br>ATTESTED COPY OF FIR</div>
+            <div class="fir-field"><span class="fir-label">FIR No.</span><span class="fir-value">CBI/ML/2026/4471</span></div>
+            <div class="fir-field"><span class="fir-label">Date</span><span class="fir-value">14/02/2026</span></div>
+            <div class="fir-field"><span class="fir-label">Police Station</span><span class="fir-value">CBI HQ, New Delhi</span></div>
+            <div class="fir-field"><span class="fir-label">Complainant</span><span class="fir-value">CBI Intelligence Wing</span></div>
+            <div class="fir-field"><span class="fir-label">Accused</span><span class="fir-value">[Victim's Name]</span></div>
+            <div class="fir-field"><span class="fir-label">Sections</span><span class="fir-value">120B, 420, 467 IPC</span></div>
+            <div class="fir-field"><span class="fir-label">PMLA Act</span><span class="fir-value">Sec 3 & 4 (2002)</span></div>
+            <div class="fir-field"><span class="fir-label">Amount</span><span class="fir-value">₹48,00,000</span></div>
+            <div class="fir-stamp">⚠️ NON-BAILABLE WARRANT ISSUED<br>Signed: ADG R.K. Mishra | Seal: CBI/HQ/ND</div>
+        </div>`;
 
     // ── Phase 1: Real-Time Chat with API Calls ──
     for (let i = 0; i < scenario.messages.length; i++) {
@@ -752,14 +821,25 @@ async function startSimulation() {
             </div>`;
         chat.scrollTop = chat.scrollHeight;
 
-        // Show scam image if applicable
+        // Show scam image / FIR document if applicable
         if (i === scenario.imageAfter) {
             await sleep(800);
-            chat.innerHTML += `
-                <div class="wa-msg wa-msg-scammer" style="padding:4px 8px">
-                    ${scenario.imageHtml}
-                    <div class="wa-time">${timeStr}</div>
-                </div>`;
+            if (selectedScenario === 'digital_arrest') {
+                // Show FIR document in chat
+                chat.innerHTML += `
+                    <div class="wa-msg wa-msg-scammer" style="padding:4px 8px">
+                        <span class="wa-sender">🔴 ${scenario.callerName}</span>
+                        📎 <em>FIR_Copy_CBI_ML_2026_4471.pdf</em>
+                        ${firDocumentHtml}
+                        <div class="wa-time">${timeStr}</div>
+                    </div>`;
+            } else {
+                chat.innerHTML += `
+                    <div class="wa-msg wa-msg-scammer" style="padding:4px 8px">
+                        ${scenario.imageHtml}
+                        <div class="wa-time">${timeStr}</div>
+                    </div>`;
+            }
             chat.scrollTop = chat.scrollHeight;
         }
 
@@ -805,6 +885,47 @@ async function startSimulation() {
                 <span class="wa-badge wa-badge-persona">🎭 ${nlpData.persona || 'WORRIED_PARENT'}</span>
                 ${nlpData.scamDetected ? '<span class="wa-badge wa-badge-scam">⚠️ SCAM</span>' : ''}
             `;
+
+            // ── MULTI-AGENT PANEL UPDATE ──
+            const agents = data.agents;
+            if (agents) {
+                document.getElementById('sim-agents-panel').style.display = 'block';
+                // Engager Agent
+                document.getElementById('agent-engager-dot').className = 'agent-status-dot ' + (agents.engager.status || 'active');
+                document.getElementById('agent-engager-action').textContent = agents.engager.action || 'Engaging...';
+                document.getElementById('agent-engager-decision').textContent = agents.engager.decision || '';
+                // Analyst Agent  
+                document.getElementById('agent-analyst-dot').className = 'agent-status-dot ' + (agents.analyst.status || 'monitoring');
+                document.getElementById('agent-analyst-action').textContent = agents.analyst.action || 'Analyzing...';
+                document.getElementById('agent-analyst-decision').textContent = agents.analyst.decision || '';
+                // Intel Agent
+                document.getElementById('agent-intel-dot').className = 'agent-status-dot ' + (agents.intel.status || 'scanning');
+                document.getElementById('agent-intel-action').textContent = agents.intel.action || 'Scanning...';
+                document.getElementById('agent-intel-decision').textContent = agents.intel.decision || '';
+
+                // ── SCAM REASONING PANEL ──
+                const scamReasons = agents.analyst.scamReasons || [];
+                const notScamReasons = agents.analyst.notScamReasons || [];
+                if (scamReasons.length || notScamReasons.length) {
+                    document.getElementById('sim-reasoning-panel').style.display = 'block';
+                    const verdictEl = document.getElementById('reasoning-verdict');
+                    if (scamReasons.length) {
+                        verdictEl.className = 'reasoning-verdict scam';
+                        verdictEl.textContent = `🚨 SCAM DETECTED — ${scamReasons.length} Red Flags Identified`;
+                    } else {
+                        verdictEl.className = 'reasoning-verdict legitimate';
+                        verdictEl.textContent = '✅ No Scam Indicators Detected — Monitoring...';
+                    }
+                    let reasonsHtml = '';
+                    scamReasons.forEach(r => {
+                        reasonsHtml += `<div class="reasoning-item red"><span class="reason-icon">❌</span><span>${r}</span></div>`;
+                    });
+                    notScamReasons.forEach(r => {
+                        reasonsHtml += `<div class="reasoning-item green"><span class="reason-icon">✅</span><span>${r}</span></div>`;
+                    });
+                    document.getElementById('reasoning-list').innerHTML = reasonsHtml;
+                }
+            }
 
             // Show extracted intel
             const intel = data.intelligence || {};
@@ -868,53 +989,64 @@ async function startSimulation() {
     chat.innerHTML += `<div class="wa-msg wa-msg-system">🛡️ SESSION ENDED — Intelligence extraction complete. Scammer data captured and logged.</div>`;
     chat.scrollTop = chat.scrollHeight;
 
-    // ── Phase 2: Voice Analysis Demo (REAL-TIME API) ──
-    await sleep(1500);
-    updateProgress(50, 'Phase 2: Voice Analysis (Whisper API)');
+    // ── SCENARIO-CONDITIONAL FEATURE PHASES ──
+    // Each scenario only shows its relevant capability
+    // Bank Fraud = Chat only (already done above)
+    // Tech Support = Chat + Voice (social engineering via call) 
+    // Lottery Scam = Chat + Image verification
+    // Digital Arrest = Chat + Voice + Image (FIR detection)
 
-    const voicePanel = document.getElementById('sim-demo-voice');
-    voicePanel.style.display = 'block';
+    const showVoice = ['tech_support', 'digital_arrest'].includes(selectedScenario);
+    const showImage = ['lottery_scam', 'digital_arrest'].includes(selectedScenario);
 
-    // Show waveform animation while API call is in progress
-    let waveHtml = '<div class="sim-waveform">';
-    for (let i = 0; i < 40; i++) {
-        const h = 6 + Math.random() * 20;
-        waveHtml += `<div class="sim-wave-bar" style="height:${h}px;animation-delay:${i * 0.05}s"></div>`;
-    }
-    waveHtml += '</div>';
+    if (showVoice) {
+        // ── Phase 2: Voice Analysis Demo (REAL-TIME API) ──
+        await sleep(1500);
+        updateProgress(50, 'Phase 2: Voice Analysis (Whisper API)');
 
-    document.getElementById('sim-voice-content').innerHTML = `
+        const voicePanel = document.getElementById('sim-demo-voice');
+        voicePanel.style.display = 'block';
+
+        // Show waveform animation while API call is in progress
+        let waveHtml = '<div class="sim-waveform">';
+        for (let i = 0; i < 40; i++) {
+            const h = 6 + Math.random() * 20;
+            waveHtml += `<div class="sim-wave-bar" style="height:${h}px;animation-delay:${i * 0.05}s"></div>`;
+        }
+        waveHtml += '</div>';
+
+        document.getElementById('sim-voice-content').innerHTML = `
         <p>📎 <strong>scammer_call_recording.mp3</strong> — Uploaded for analysis</p>
         ${waveHtml}
         <p style="margin-top:8px">⏳ Processing with Groq Whisper v3-large... <span class="loading-dot">●</span></p>
     `;
-    scrollFeaturePanel();
+        scrollFeaturePanel();
 
-    // ── REAL API CALL: Voice Analysis ──
-    try {
-        const voiceRes = await fetch(`${API_BASE}/api/simulate/voice`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: sessionId,
-                scenarioName: selectedScenario,
-                callerName: scenario.callerName
-            })
-        });
-        const voiceData = await voiceRes.json();
+        // ── REAL API CALL: Voice Analysis ──
+        try {
+            const voiceRes = await fetch(`${API_BASE}/api/simulate/voice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: sessionId,
+                    scenarioName: selectedScenario,
+                    callerName: scenario.callerName
+                })
+            });
+            const voiceData = await voiceRes.json();
 
-        // Show real transcript from API
-        const voiceIntelHtml = [
-            ...(voiceData.intelligence?.bankAccounts || []).map(v => `<span class="sim-intel-pill bank">🏦 ${v}</span>`),
-            ...(voiceData.intelligence?.upiIds || []).map(v => `<span class="sim-intel-pill upi">📱 ${v}</span>`),
-            ...(voiceData.intelligence?.phoneNumbers || []).map(v => `<span class="sim-intel-pill phone">📞 ${v}</span>`),
-            ...(voiceData.intelligence?.phishingLinks || []).map(v => `<span class="sim-intel-pill link">🔗 ${v}</span>`)
-        ].join('');
+            // Show real transcript from API
+            const voiceIntelHtml = [
+                ...(voiceData.intelligence?.bankAccounts || []).map(v => `<span class="sim-intel-pill bank">🏦 ${v}</span>`),
+                ...(voiceData.intelligence?.upiIds || []).map(v => `<span class="sim-intel-pill upi">📱 ${v}</span>`),
+                ...(voiceData.intelligence?.phoneNumbers || []).map(v => `<span class="sim-intel-pill phone">📞 ${v}</span>`),
+                ...(voiceData.intelligence?.phishingLinks || []).map(v => `<span class="sim-intel-pill link">🔗 ${v}</span>`)
+            ].join('');
 
-        const voicePatternsHtml = (voiceData.scamAnalysis?.patternsFound || [])
-            .map(p => `<span class="nlp-pattern-tag">${p}</span>`).join('');
+            const voicePatternsHtml = (voiceData.scamAnalysis?.patternsFound || [])
+                .map(p => `<span class="nlp-pattern-tag">${p}</span>`).join('');
 
-        document.getElementById('sim-voice-content').innerHTML = `
+            document.getElementById('sim-voice-content').innerHTML = `
             <p>📎 <strong>scammer_call_recording.mp3</strong> — Analysis Complete ✅</p>
             ${waveHtml}
             <div style="margin-top:8px;padding:6px 10px;background:var(--bg-secondary);border-radius:var(--radius-sm);font-size:0.8em;display:flex;gap:16px;flex-wrap:wrap">
@@ -936,70 +1068,74 @@ async function startSimulation() {
             </div>
         `;
 
-        // Add voice-extracted intel to the main intel tracker
-        for (const v of (voiceData.intelligence?.bankAccounts || [])) {
-            if (!allIntel.bankAccounts.includes(v)) allIntel.bankAccounts.push(v);
-        }
-        for (const v of (voiceData.intelligence?.upiIds || [])) {
-            if (!allIntel.upiIds.includes(v)) allIntel.upiIds.push(v);
-        }
-        for (const v of (voiceData.intelligence?.phoneNumbers || [])) {
-            if (!allIntel.phoneNumbers.includes(v)) allIntel.phoneNumbers.push(v);
-        }
-        for (const v of (voiceData.intelligence?.phishingLinks || [])) {
-            if (!allIntel.phishingLinks.includes(v)) allIntel.phishingLinks.push(v);
-        }
+            // Add voice-extracted intel to the main intel tracker
+            for (const v of (voiceData.intelligence?.bankAccounts || [])) {
+                if (!allIntel.bankAccounts.includes(v)) allIntel.bankAccounts.push(v);
+            }
+            for (const v of (voiceData.intelligence?.upiIds || [])) {
+                if (!allIntel.upiIds.includes(v)) allIntel.upiIds.push(v);
+            }
+            for (const v of (voiceData.intelligence?.phoneNumbers || [])) {
+                if (!allIntel.phoneNumbers.includes(v)) allIntel.phoneNumbers.push(v);
+            }
+            for (const v of (voiceData.intelligence?.phishingLinks || [])) {
+                if (!allIntel.phishingLinks.includes(v)) allIntel.phishingLinks.push(v);
+            }
 
-    } catch (err) {
-        console.error('Voice analysis API error:', err);
-        document.getElementById('sim-voice-content').innerHTML += `
+        } catch (err) {
+            console.error('Voice analysis API error:', err);
+            document.getElementById('sim-voice-content').innerHTML += `
             <div style="margin-top:12px;padding:12px;background:var(--bg-primary);border-radius:var(--radius-sm);box-shadow:var(--clay-shadow-inset)">
                 <strong>📝 Transcript:</strong><br><em>${scenario.voiceTranscript}</em>
             </div>
             <span class="badge badge-high">⚠️ SCAM CONFIRMED</span>
         `;
-    }
-    scrollFeaturePanel();
+        }
+        scrollFeaturePanel();
+    } // end showVoice
 
-    // ── Phase 3: Image Intelligence Demo (REAL-TIME API) ──
-    await sleep(2000);
-    updateProgress(65, 'Phase 3: Image Intelligence (Vision API)');
+    if (showImage) {
+        // ── Phase 3: Image Intelligence Demo (REAL-TIME API) ──
+        await sleep(2000);
+        updateProgress(65, selectedScenario === 'digital_arrest' ? 'Phase 3: Fake FIR Detection (Vision AI)' : 'Phase 3: Image Intelligence (Vision API)');
 
-    document.getElementById('sim-demo-image').style.display = 'block';
-    document.getElementById('sim-image-content').innerHTML = `
-        <p>📎 <strong>scam_screenshot.png</strong> — Uploaded for Vision AI analysis</p>
+        document.getElementById('sim-demo-image').style.display = 'block';
+        document.getElementById('sim-image-content').innerHTML = `
+        <p>📎 <strong>${selectedScenario === 'digital_arrest' ? 'fake_fir_document.png' : 'scam_screenshot.png'}</strong> — Uploaded for Vision AI analysis</p>
         ${scenario.imageHtml}
         <p style="margin-top:8px">⏳ Analyzing with Groq Vision AI (Llama-4-Scout)... <span class="loading-dot">●</span></p>
     `;
-    scrollFeaturePanel();
+        scrollFeaturePanel();
 
-    // ── REAL API CALL: Image Intelligence ──
-    try {
-        const imgRes = await fetch(`${API_BASE}/api/simulate/image`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: sessionId,
-                scenarioName: selectedScenario,
-                imageDescription: scenario.name
-            })
-        });
-        const imgData = await imgRes.json();
+        // ── REAL API CALL: Image Intelligence ──
+        try {
+            const imgRes = await fetch(`${API_BASE}/api/simulate/image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: sessionId,
+                    scenarioName: selectedScenario,
+                    imageDescription: scenario.name
+                })
+            });
+            const imgData = await imgRes.json();
 
-        const imgIntelHtml = [
-            ...(imgData.intelligence?.bankAccounts || []).map(v => `<span class="sim-intel-pill bank">🏦 ${v}</span>`),
-            ...(imgData.intelligence?.upiIds || []).map(v => `<span class="sim-intel-pill upi">📱 ${v}</span>`),
-            ...(imgData.intelligence?.phoneNumbers || []).map(v => `<span class="sim-intel-pill phone">📞 ${v}</span>`),
-            ...(imgData.intelligence?.phishingLinks || []).map(v => `<span class="sim-intel-pill link">🔗 ${v}</span>`)
-        ].join('');
+            const imgIntelHtml = [
+                ...(imgData.intelligence?.bankAccounts || []).map(v => `<span class="sim-intel-pill bank">🏦 ${v}</span>`),
+                ...(imgData.intelligence?.upiIds || []).map(v => `<span class="sim-intel-pill upi">📱 ${v}</span>`),
+                ...(imgData.intelligence?.phoneNumbers || []).map(v => `<span class="sim-intel-pill phone">📞 ${v}</span>`),
+                ...(imgData.intelligence?.phishingLinks || []).map(v => `<span class="sim-intel-pill link">🔗 ${v}</span>`)
+            ].join('');
 
-        // Format the analysis text (convert markdown bold to HTML)
-        const formattedAnalysis = (imgData.analysis || '[No analysis available]')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
+            // Format the analysis text (convert markdown bold to HTML)
+            const formattedAnalysis = (imgData.analysis || '[No analysis available]')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
 
-        document.getElementById('sim-image-content').innerHTML = `
-            <p>📎 <strong>scam_screenshot.png</strong> — Analysis Complete ✅</p>
+            const verdictText = selectedScenario === 'digital_arrest' ? '⚠️ FAKE FIR DOCUMENT DETECTED' : '⚠️ FAKE ALERT DETECTED';
+
+            document.getElementById('sim-image-content').innerHTML = `
+            <p>📎 <strong>${selectedScenario === 'digital_arrest' ? 'fake_fir_document.png' : 'scam_screenshot.png'}</strong> — Analysis Complete ✅</p>
             ${scenario.imageHtml}
             <div style="margin-top:8px;padding:6px 10px;background:var(--bg-secondary);border-radius:var(--radius-sm);font-size:0.8em;display:flex;gap:16px;flex-wrap:wrap">
                 <span>🖼️ Type: <strong>${imgData.imageType || 'Unknown'}</strong></span>
@@ -1011,34 +1147,35 @@ async function startSimulation() {
             </div>
             <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
                 ${imgIntelHtml}
-                <span class="badge badge-high" style="margin-left:8px">⚠️ FAKE ALERT DETECTED</span>
+                <span class="badge badge-high" style="margin-left:8px">${verdictText}</span>
             </div>
         `;
 
-        // Add image-extracted intel to the main intel tracker
-        for (const v of (imgData.intelligence?.bankAccounts || [])) {
-            if (!allIntel.bankAccounts.includes(v)) allIntel.bankAccounts.push(v);
-        }
-        for (const v of (imgData.intelligence?.upiIds || [])) {
-            if (!allIntel.upiIds.includes(v)) allIntel.upiIds.push(v);
-        }
-        for (const v of (imgData.intelligence?.phoneNumbers || [])) {
-            if (!allIntel.phoneNumbers.includes(v)) allIntel.phoneNumbers.push(v);
-        }
-        for (const v of (imgData.intelligence?.phishingLinks || [])) {
-            if (!allIntel.phishingLinks.includes(v)) allIntel.phishingLinks.push(v);
-        }
+            // Add image-extracted intel to the main intel tracker
+            for (const v of (imgData.intelligence?.bankAccounts || [])) {
+                if (!allIntel.bankAccounts.includes(v)) allIntel.bankAccounts.push(v);
+            }
+            for (const v of (imgData.intelligence?.upiIds || [])) {
+                if (!allIntel.upiIds.includes(v)) allIntel.upiIds.push(v);
+            }
+            for (const v of (imgData.intelligence?.phoneNumbers || [])) {
+                if (!allIntel.phoneNumbers.includes(v)) allIntel.phoneNumbers.push(v);
+            }
+            for (const v of (imgData.intelligence?.phishingLinks || [])) {
+                if (!allIntel.phishingLinks.includes(v)) allIntel.phishingLinks.push(v);
+            }
 
-    } catch (err) {
-        console.error('Image analysis API error:', err);
-        document.getElementById('sim-image-content').innerHTML += `
+        } catch (err) {
+            console.error('Image analysis API error:', err);
+            document.getElementById('sim-image-content').innerHTML += `
             <div style="margin-top:12px;padding:12px;background:var(--bg-primary);border-radius:var(--radius-sm);box-shadow:var(--clay-shadow-inset)">
                 <strong>🔍 Analysis:</strong><br>${scenario.imageAnalysis}
             </div>
             <span class="badge badge-high">⚠️ FAKE ALERT DETECTED</span>
         `;
-    }
-    scrollFeaturePanel();
+        }
+        scrollFeaturePanel();
+    } // end showImage
 
     // ── Phase 4: Network Mapping ──
     await sleep(2000);

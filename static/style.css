@@ -1608,3 +1608,341 @@ body {
         opacity: 1;
     }
 }
+
+/* ── Multi-Agent Orchestration Panel ─────────────── */
+.sim-agents-panel {
+    margin-top: 10px;
+}
+
+.sim-agents-panel h4 {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.agents-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.agent-card {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    padding: 10px;
+    border-left: 3px solid #555;
+    transition: all 0.3s ease;
+}
+
+.agent-card.agent-engager {
+    border-left-color: #00b894;
+}
+
+.agent-card.agent-analyst {
+    border-left-color: #e17055;
+}
+
+.agent-card.agent-intel {
+    border-left-color: #6c5ce7;
+}
+
+.agent-card.agent-active {
+    box-shadow: 0 0 12px rgba(108, 92, 231, 0.3);
+}
+
+.agent-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+}
+
+.agent-icon {
+    font-size: 14px;
+}
+
+.agent-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.agent-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+}
+
+.agent-status-dot.active {
+    background: #00b894;
+    animation: agentPulse 1.5s ease-in-out infinite;
+}
+
+.agent-status-dot.alert {
+    background: #e17055;
+    animation: agentPulse 0.8s ease-in-out infinite;
+}
+
+.agent-status-dot.scanning {
+    background: #6c5ce7;
+    animation: agentPulse 2s ease-in-out infinite;
+}
+
+.agent-status-dot.extracting {
+    background: #fdcb6e;
+    animation: agentPulse 1s ease-in-out infinite;
+}
+
+.agent-action {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.agent-decision {
+    font-size: 9px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    font-style: italic;
+    line-height: 1.3;
+}
+
+@keyframes agentPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+    }
+}
+
+/* ── Scam Reasoning Panel ────────────────────────── */
+.sim-reasoning-panel {
+    margin-top: 10px;
+}
+
+.sim-reasoning-panel h4 {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.reasoning-verdict {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.reasoning-verdict.scam {
+    background: rgba(225, 112, 85, 0.15);
+    color: #e17055;
+    border: 1px solid rgba(225, 112, 85, 0.3);
+}
+
+.reasoning-verdict.legitimate {
+    background: rgba(0, 184, 148, 0.15);
+    color: #00b894;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.reasoning-list {
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.reasoning-item {
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.reasoning-item .reason-icon {
+    flex-shrink: 0;
+    font-size: 10px;
+}
+
+.reasoning-item.red .reason-icon {
+    color: #e17055;
+}
+
+.reasoning-item.green .reason-icon {
+    color: #00b894;
+}
+
+@media (max-width: 768px) {
+    .agents-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Digital Arrest Video Call Overlay ────────────── */
+.da-video-overlay {
+    grid-column: 1 / -1;
+    background: #0a0a1a;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 2px solid #e94560;
+    animation: daFadeIn 0.5s ease;
+}
+
+@keyframes daFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.da-video-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #0f3460;
+    font-size: 12px;
+    color: #fff;
+}
+
+.da-rec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e94560;
+    animation: recBlink 1s ease-in-out infinite;
+}
+
+@keyframes recBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.da-rec-text {
+    font-weight: 700;
+    color: #e94560;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.da-video-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.da-video-timer {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: #e94560;
+    font-size: 13px;
+}
+
+.da-video-body {
+    padding: 8px;
+    background: #000;
+}
+
+.da-video-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #1a1a2e;
+    font-size: 10px;
+}
+
+.da-caller-badge {
+    color: #f39c12;
+    font-weight: 700;
+}
+
+.da-video-warning {
+    color: #e94560;
+    font-style: italic;
+    animation: warningPulse 2s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* FIR Document in Chat */
+.wa-fir-document {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 4px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    color: #333;
+    max-width: 280px;
+}
+
+.wa-fir-document .fir-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #333;
+    margin-bottom: 6px;
+}
+
+.wa-fir-document .fir-field {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    border-bottom: 1px dotted #ccc;
+}
+
+.wa-fir-document .fir-field .fir-label {
+    font-weight: 700;
+    color: #555;
+}
+
+.wa-fir-document .fir-field .fir-value {
+    color: #222;
+}
+
+.wa-fir-document .fir-stamp {
+    margin-top: 8px;
+    text-align: center;
+    color: #e94560;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}

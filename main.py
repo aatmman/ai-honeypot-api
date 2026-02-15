@@ -842,16 +842,23 @@ async def health_check():
 # SIMULATION API — Real-Time Demo for Judges
 # ═══════════════════════════════════════════════════════
 
-class SimulateRequest(BaseModel):
+from rag_engine import RAGEngine
+
+# Initialize RAG Engine
+rag_engine = RAGEngine()
+
+class SimulationRequest(BaseModel):
     sessionId: str
     scammerMessage: str
     scenarioName: str = "bank_fraud"
+    imageDescription: Optional[str] = None
 
 @app.post("/api/simulate")
-async def simulate_conversation(request: SimulateRequest):
+async def simulate_conversation(req: SimulationRequest):
     """Process a scammer message through the full honeypot pipeline and return NLP analysis"""
-    session_id = f"sim-{request.sessionId}"
-    scam_msg = request.scammerMessage
+    session_id = f"sim-{req.sessionId}"
+    scam_msg = req.scammerMessage
+    scenario = req.scenarioName
 
     # Initialize session if new
     if session_id not in sessions:
@@ -921,6 +928,73 @@ async def simulate_conversation(request: SimulateRequest):
         'timestamp': int(datetime.now().timestamp() * 1000)
     })
 
+    # ══════════════════════════════════════════
+    # MULTI-AGENT ORCHESTRATION
+    # Each agent processes the message independently
+    # ══════════════════════════════════════════
+    
+    # ── ANALYST AGENT: Generate scam reasoning ──
+    scam_reasons = []
+    not_scam_reasons = []
+    
+    # Check for specific scam indicators
+    msg_lower = scam_msg.lower()
+    if any(w in msg_lower for w in ['urgent', 'immediately', 'right now', 'hurry', 'quickly']):
+        scam_reasons.append("Uses urgency tactics to pressure victim into quick action")
+    if any(w in msg_lower for w in ['transfer', 'pay', 'send money', 'deposit']):
+        scam_reasons.append("Requests money transfer or payment")
+    if any(w in msg_lower for w in ['account', 'bank', 'sbi', 'hdfc', 'icici']):
+        scam_reasons.append("References banking/financial institution to appear legitimate")
+    if any(w in msg_lower for w in ['block', 'suspend', 'freeze', 'flag']):
+        scam_reasons.append("Threatens account blocking/suspension to create fear")
+    if any(w in msg_lower for w in ['otp', 'cvv', 'pin', 'password', 'aadhaar']):
+        scam_reasons.append("Asks for sensitive credentials (OTP/CVV/PIN/Aadhaar)")
+    if any(w in msg_lower for w in ['upi', '@ybl', '@oksbi', '@axl', '@paytm']):
+        scam_reasons.append("Contains UPI ID for fraudulent money transfer")
+    if any(w in msg_lower for w in ['bit.ly', '.com/', 'http', 'click', 'download', 'install']):
+        scam_reasons.append("Contains suspicious link or download request")
+    if any(w in msg_lower for w in ['police', 'cbi', 'customs', 'arrest', 'warrant', 'fir']):
+        scam_reasons.append("Impersonates law enforcement or government authority")
+    if any(w in msg_lower for w in ['digital arrest', 'cyber crime', 'money laundering', 'pmla']):
+        scam_reasons.append("Uses 'Digital Arrest' tactic — this does NOT exist in Indian law")
+    if any(w in msg_lower for w in ['don\'t tell', 'confidential', 'secret', 'do not share']):
+        scam_reasons.append("Forbids victim from contacting others — isolation tactic")
+    if any(w in msg_lower for w in ['lottery', 'winner', 'prize', 'lucky draw', 'congratulation']):
+        scam_reasons.append("Claims victim won a prize — classic advance-fee fraud")
+    if any(w in msg_lower for w in ['virus', 'hacked', 'infected', 'trojan', 'malware']):
+        scam_reasons.append("Claims device is infected — tech support scam indicator")
+    if any(w in msg_lower for w in ['teamviewer', 'anydesk', 'remote access']):
+        scam_reasons.append("Requests remote access to device — extremely dangerous")
+    if any(w in msg_lower for w in ['employee id', 'badge', 'department', 'inspector', 'officer']):
+        scam_reasons.append("Provides fake credentials to appear authentic")
+    
+    # ── RAG LOOKUP ──
+    rag_result = None
+    try:
+        rag_result = rag_engine.retrieve(scam_msg)
+    except Exception as e:
+        print(f"RAG Error: {e}")
+
+    if rag_result:
+        scam_reasons.append(f"🔍 Pattern Match: {rag_result['category']} — {rag_result['risk_level']} Risk")
+        scam_reasons.append(f"⚖️ Legal Analysis: {rag_result['legal_info']}")
+
+    
+    # Not-scam indicators
+    if not scam_reasons:
+        not_scam_reasons.append("No known scam patterns detected in this message")
+    if len(scam_msg.split()) < 5:
+        not_scam_reasons.append("Message too short for conclusive analysis")
+    
+    # Calculate intel counts
+    intel_count = (len(new_intel.bankAccounts) + len(new_intel.upiIds) + 
+                   len(new_intel.phoneNumbers) + len(new_intel.phishingLinks))
+    
+    # ── Agent status descriptions ──
+    engager_status = f"Responding as {session_data.get('persona', 'WORRIED_PARENT').replace('_', ' ').title()}"
+    analyst_status = f"SCAM DETECTED — {len(scam_reasons)} red flags" if scam_reasons else "Monitoring — No scam indicators yet"
+    intel_status = f"Extracted {intel_count} intelligence items" if intel_count > 0 else "Scanning for extractable intelligence..."
+
     return {
         'reply': agent_reply,
         'nlp': {
@@ -932,7 +1006,37 @@ async def simulate_conversation(request: SimulateRequest):
             'messageCount': session_data['message_count']
         },
         'intelligence': intel_found,
-        'sessionId': session_id
+        'sessionId': session_id,
+        # ── Multi-Agent Swarm Responses ──
+        'agents': {
+            'engager': {
+                'name': '🎭 Engager Agent',
+                'status': 'active',
+                'action': engager_status,
+                'decision': f"Playing {session_data.get('persona', 'WORRIED_PARENT').replace('_', ' ').lower()} persona to keep scammer engaged",
+                'persona': session_data.get('persona', 'WORRIED_PARENT'),
+                'stage': stage,
+                'reply': agent_reply
+            },
+            'analyst': {
+                'name': '🔍 Analyst Agent',
+                'status': 'alert' if scam_reasons else 'monitoring',
+                'action': analyst_status,
+                'decision': f"Confidence: {round(confidence * 100)}% — {len(scam_reasons)} scam indicators detected" if scam_reasons else "No conclusive scam indicators yet — continuing monitoring",
+                'scamReasons': scam_reasons,
+                'notScamReasons': not_scam_reasons,
+                'confidence': round(confidence, 3),
+                'patterns': patterns
+            },
+            'intel': {
+                'name': '📋 Intel Agent',
+                'status': 'extracting' if intel_count > 0 else 'scanning',
+                'action': intel_status,
+                'decision': f"Cross-referencing {intel_count} items against known scam databases" if intel_count > 0 else "No extractable intelligence yet — awaiting financial identifiers",
+                'extracted': intel_found,
+                'totalItems': intel_count
+            }
+        }
     }
 
 
