@@ -661,6 +661,40 @@ const SCENARIOS = {
         </div>`,
         voiceTranscript: '"Congratulations! Your mobile number has won Google Lucky Draw 2026, prize of twenty five lakh rupees! Please pay processing fee of fifteen thousand rupees to UPI luckydraw@axl or bank account 5544332211009988. Visit google-luckydraw.com to claim."',
         imageAnalysis: 'This is a <strong style="color:var(--accent-orange)">CLASSIC LOTTERY/PRIZE SCAM</strong>. Google does not run "Lucky Draw" promotions via phone/SMS. The claim URL (google-luckydraw.com) is not an official Google domain. Requests for upfront "processing fee" payment are a hallmark of advance-fee fraud.'
+    },
+    digital_arrest: {
+        name: 'Digital Arrest Scam',
+        callerName: 'CBI Cyber Crime Dept.',
+        messages: [
+            { text: 'Hello, this is Inspector Vikram Sharma from CBI Cyber Crime Division, New Delhi. Your Aadhaar number 8765-XXXX-4321 has been flagged in a major money laundering case FIR No. CBI/ML/2026/4471. Stay on this video call — you are under DIGITAL ARREST.' },
+            { text: 'Sir, a SIM card registered to your Aadhaar was used to transfer ₹48 Lakhs to terrorist accounts as part of hawala operation. You are co-accused in this case. If you disconnect this call, we will issue a non-bailable warrant immediately.' },
+            { text: 'I am sending you the official FIR copy and arrest warrant right now. Look at it carefully — your name is clearly mentioned. Under Section 120B IPC and PMLA Act 2002, you face 7 years imprisonment.' },
+            { text: 'Sir, the only way to prove your innocence is through a "Verification Deposit". You must transfer ₹2,50,000 to the Supreme Court escrow account 3344556677889900 IFSC SBIN0005678. This money will be refunded in 24 hours after clearance.' },
+            { text: 'DO NOT tell anyone about this investigation! Under Section 37 of PMLA Act, disclosing details of ongoing investigation is punishable. Keep your camera ON at all times. I am watching from CBI headquarters.' },
+            { text: 'Sir, the Additional Director General is getting impatient. If you don\'t transfer the verification amount to UPI cbi-escrow@gov within 30 minutes, I will send the arrest team to your address at your registered location. Pay immediately on 9911223344!' }
+        ],
+        imageAfter: 2,
+        imageHtml: `<div class="wa-scam-image" style="background:#1a1a2e;border-color:#e94560;color:#fff">
+            <div style="font-size:12px;text-align:center;padding:8px 12px;background:#0f3460;border-radius:6px 6px 0 0;margin:-10px -12px 8px;letter-spacing:1px;font-weight:700;color:#e94560">
+                ⚖️ CENTRAL BUREAU OF INVESTIGATION — CONFIDENTIAL
+            </div>
+            <div style="font-size:11px;line-height:1.6;font-family:monospace">
+                <strong style="color:#e94560">📋 FIRST INFORMATION REPORT</strong><br>
+                FIR No: CBI/ML/2026/4471<br>
+                Under Sections: 120B, 420, 467, 471 IPC<br>
+                PMLA Act 2002, Sec 3 & 4<br>
+                <hr style="border-color:#333;margin:6px 0">
+                <strong>Accused:</strong> [Victim's Name]<br>
+                <strong>Aadhaar:</strong> 8765-XXXX-4321<br>
+                <strong>Amount Involved:</strong> ₹48,00,000<br>
+                <strong>Offence:</strong> Money Laundering & Terror Financing<br>
+                <hr style="border-color:#333;margin:6px 0">
+                <span style="color:#e94560;font-weight:700">⚠️ NON-BAILABLE WARRANT ISSUED</span><br>
+                <span style="font-size:9px;color:#888">Seal: CBI/HQ/ND | Signed: ADG R.K. Mishra</span>
+            </div>
+        </div>`,
+        voiceTranscript: '"This is Inspector Vikram Sharma from CBI Cyber Crime Division. Your Aadhaar linked SIM was used in hawala money laundering of forty eight lakhs. You are under digital arrest. Transfer two lakh fifty thousand to Supreme Court escrow account 3344556677889900 IFSC SBIN0005678 or UPI cbi-escrow@gov. Do not disconnect this call or tell anyone. Call 9911223344 for verification."',
+        imageAnalysis: 'This is a <strong style="color:var(--accent-orange)">FAKE GOVERNMENT DOCUMENT</strong> designed as a "Digital Arrest" scam. CBI does NOT issue FIRs via WhatsApp/video call. The document contains fake sections, fabricated case numbers, and forged signatures. No legitimate law enforcement agency demands money over video calls or threatens "digital arrest" — this term does not exist in Indian law.'
     }
 };
 

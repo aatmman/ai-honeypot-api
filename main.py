@@ -968,6 +968,12 @@ async def simulate_voice_analysis(request: SimulateVoiceRequest):
             "accent_hint": "Indian English, overly enthusiastic",
             "duration": "1m 58s",
             "caller_id": "+91 9988-112-233"
+        },
+        "digital_arrest": {
+            "context": "a scammer impersonating a CBI Inspector on a video call, threatening the victim with 'digital arrest' for alleged money laundering and hawala transactions linked to their Aadhaar, demanding immediate transfer to a 'Supreme Court escrow account' while threatening non-bailable warrant",
+            "accent_hint": "Indian English, authoritative and threatening, using legal jargon like PMLA Act, Section 120B, non-bailable warrant",
+            "duration": "4m 47s",
+            "caller_id": "+91 9911-223-344"
         }
     }
     
@@ -1065,6 +1071,10 @@ async def simulate_image_analysis(request: SimulateImageRequest):
         "lottery_scam": {
             "image_type": "Fake Google Lucky Draw Lottery Winner Certificate",
             "context": "A screenshot of a fake lottery winning certificate with Google branding, showing a prize amount and a QR code / UPI ID for paying processing fees"
+        },
+        "digital_arrest": {
+            "image_type": "Fake CBI FIR Document and Non-Bailable Arrest Warrant",
+            "context": "A fake First Information Report (FIR) document and arrest warrant with CBI (Central Bureau of Investigation) branding, containing fabricated case numbers, PMLA Act sections, forged ADG signatures, and a 'Supreme Court escrow' bank account for 'verification deposit'. Used in digital arrest scam via video call."
         }
     }
     
