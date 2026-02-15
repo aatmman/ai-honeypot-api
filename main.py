@@ -25,9 +25,10 @@ try:
 except ImportError:
     pass  # dotenv not installed, rely on system env vars
 
-# Import v3 modules
-import database as db
-from complaint_generator import generate_complaint_text
+# Import v3 modules from backend package
+import backend.database as db
+from backend.complaint_generator import generate_complaint_text
+from backend.rag_engine import RAGEngine
 
 app = FastAPI(title="Agentic Honeypot API v3.0", version="3.0")
 
@@ -860,7 +861,7 @@ async def health_check():
 # SIMULATION API — Real-Time Demo for Judges
 # ═══════════════════════════════════════════════════════
 
-from rag_engine import RAGEngine
+from backend.rag_engine import RAGEngine
 
 # Initialize RAG Engine
 rag_engine = RAGEngine()

@@ -127,10 +127,7 @@ python tests/self_test.py
 
 ## Deployment
 
-This project is configured for deployment on platforms like Railway or Render.
+This project is configured for deployment on platforms- Railway 
 - **Procfile** is included for web worker configuration.
 - **requirements.txt** lists all necessary packages.
 
----
-**Author**: Team Antigravity
-**Competition**: India AI Impact Buildathon
